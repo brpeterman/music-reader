@@ -12,17 +12,18 @@ FILE_NAME = "now-playing.txt"
 
 class MusicReader
   def initialize(uri, output_file)
+    @uri = uri
     @run = true
     @playing = false
     @song = {}
     @filename = output_file
-    @ws = WebSocket::Client::Simple.connect uri
-    setup_handlers
   end
   
-  def block
-    while @run
-      sleep 1
+  def run(block = true)
+    @ws = WebSocket::Client::Simple.connect @uri
+    setup_handlers
+    if block then
+      sleep 1 until !@run
     end
   end
   
@@ -45,8 +46,10 @@ class MusicReader
     @song = song_data
     if @playing then
       song_string = build_song_string(song_data)
-      $stderr.puts "Updated song to #{song_string}"
-      write_text song_string
+      if song_string
+        $stderr.puts "Updated song to #{song_string}"
+        write_text song_string
+      end
     end
   end
   
@@ -76,7 +79,9 @@ class MusicReader
   def build_song_string(song_data)
     title = song_data["title"]
     artist = song_data["artist"]
-    "Now Playing: #{title} by #{artist}"
+    if title && artist then
+      "Now Playing: #{title} by #{artist}"
+    end
   end
 
   def write_text(text_data)
@@ -91,4 +96,4 @@ trap "SIGINT" do
 end
 
 $reader = MusicReader.new SERVER_URI, "#{DIR_PATH}\\#{FILE_NAME}"
-$reader.block
+$reader.run
