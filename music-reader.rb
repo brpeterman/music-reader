@@ -21,7 +21,9 @@ class MusicReader
   end
   
   def block
-    loop while @run
+    while @run
+      sleep 1
+    end
   end
   
   def disconnect
