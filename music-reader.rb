@@ -66,7 +66,7 @@ class MusicReader
           reader.handle_playState payload
         when "state" # There's a bug in the API where both "playState" and "state" are the same event
           reader.handle_playState payload
-        when "song"
+        when "track"
           reader.handle_song payload
       end
     end
@@ -80,13 +80,14 @@ class MusicReader
     title = song_data["title"]
     artist = song_data["artist"]
     if title && artist then
-      "Now Playing: #{title} by #{artist}"
+      "\u25BA #{title} by #{artist}"
     end
   end
 
   def write_text(text_data)
-    File.open(@filename, "w") do |file|
+    File.open(@filename, "w:UTF-8") do |file|
       file.print text_data
+      sleep 1 # hold the file for a moment
     end
   end
 end
